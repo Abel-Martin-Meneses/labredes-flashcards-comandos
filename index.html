@@ -149,17 +149,12 @@
     // Base de datos de comandos
     const flashcards = [
         // Bloque 1: MikroTik
-        { category: "MikroTik - Básicos", question: "Comando para resetear de fábrica el router sin la configuración por defecto y sin mantener los usuarios.", answer: "system reset-configuration no-defaults=yes keep-users=no" },
-        { category: "MikroTik - Básicos", question: "Comando para cambiar el nombre de identidad del router a 'R1'.", answer: "system identity set name=R1" },
         { category: "MikroTik - Interfaces", question: "Comando para asignar la IP 192.168.1.1/24 a la interfaz física ether1.", answer: "ip address add address=192.168.1.1/24 interface=ether1" },
         { category: "MikroTik - Enrutamiento", question: "Comando para añadir una ruta estática hacia la red 10.0.0.0/24 a través de la puerta de enlace 192.168.1.254.", answer: "ip route add dst-address=10.0.0.0/24 gateway=192.168.1.254" },
         { category: "MikroTik - Enrutamiento", question: "Comando para añadir una ruta por defecto a través de la puerta de enlace 192.168.1.254.", answer: "ip route add gateway=192.168.1.254" },
         { category: "MikroTik - VLANs", question: "Comando para crear la interfaz virtual para la VLAN 10, colgando de ether1, con el nombre 'ether1.10'.", answer: "interface vlan add interface=ether1 name=ether1.10 vlan-id=10" },
         
         // Bloque 2: Switch TP-Link
-        { category: "TP-Link - Modos", question: "Comando para entrar al modo de configuración desde el modo privilegiado (S1#).", answer: "configure" },
-        { category: "TP-Link - Básicos", question: "Comando para cambiar el nombre del switch a 'SW1'.", answer: "hostname SW1" },
-        { category: "TP-Link - Básicos", question: "Comando para guardar la configuración actual y hacerla persistente en el inicio.", answer: "copy running-config startup-config" },
         { category: "TP-Link - VLANs", question: "Comando para crear la VLAN 10 en la base de datos.", answer: "vlan 10" },
         { category: "TP-Link - VLANs", question: "Comando (estando dentro de la vlan) para ponerle el nombre 'Alumnos'.", answer: "name Alumnos" },
         { category: "TP-Link - Puertos", question: "Comando para entrar a configurar simultáneamente el rango de puertos gigabit del 1 al 5.", answer: "interface range gi 1/0/1-5" },
@@ -193,7 +188,6 @@
         { category: "FRR Linux - BGP", question: "Comando BGP para forzar que mi router se anuncie a sí mismo como el próximo salto hacia el vecino 10.0.0.2.", answer: "neighbor 10.0.0.2 next-hop-self" },
         { category: "FRR Linux - BGP", question: "Comando BGP para inyectar y anunciar mi red local 12.0.0.0/24 al resto de Sistemas Autónomos.", answer: "network 12.0.0.0/24" },
         { category: "FRR Linux - BGP", question: "Comando BGP para sumarizar la red 20.0.1.0/24 hacia el exterior anunciando únicamente el resumen.", answer: "aggregate-address 20.0.1.0/24 summary-only" },
-        { category: "FRR Linux - BGP", question: "Comando en la terminal general de Linux (fuera del modo config) para forzar la sincronización suave de políticas BGP.", answer: "clear ip bgp * soft" },
 
         // Bloque 6: Firewalls
         { category: "MikroTik - Firewall", question: "Comando para entrar al submenú donde se gestionan las reglas de filtrado del cortafuegos.", answer: "/ip firewall filter" },
@@ -201,11 +195,6 @@
         { category: "MikroTik - Firewall", question: "Regla para denegar todo el tráfico que intente ATRAVESAR el router (forward) y que provenga de la IP origen 10.0.0.0/24.", answer: "add chain=forward src-address=10.0.0.0/24 action=drop" },
         { category: "MikroTik - Firewall", question: "Regla vital en forward para permitir el tráfico de retorno de conexiones ya iniciadas o relacionadas.", answer: "add chain=forward connection-state=established,related action=accept" },
         { category: "MikroTik - DHCP Relay", question: "Comando para activar un agente DHCP llamado 'relay1' que escuche en ether1 y reenvíe al 10.2.0.10, usando la IP local 172.16.0.1.", answer: "ip dhcp-relay add name=relay1 dhcp-server=10.2.0.10 interface=ether1 local-address=172.16.0.1 disabled=no" },
-
-        // Bloque 7: Linux Terminal
-        { category: "Linux - Servicios", question: "Comando de sistema para reiniciar el demonio del servidor DHCP tras modificar su fichero de configuración.", answer: "systemctl restart isc-dhcp-server" },
-        { category: "Linux - Red", question: "Comando para que un cliente Linux libere y solicite de nuevo su concesión de IP por DHCP (modo verbose).", answer: "dhclient -r -v" },
-        { category: "Linux - Red", question: "Comando para limpiar y vaciar la memoria caché de resolución DNS local.", answer: "resolvectl flush-caches" }
     ];
 
     // Barajar las preguntas para que no salgan siempre en el mismo orden
