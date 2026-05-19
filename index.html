@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards - Lab de Redes</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --primary: #5c6ac4;
+            --success: #47b881;
+            --danger: #de3618;
+            --text-main: #333333;
+            --text-muted: #666666;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        h1 { color: var(--primary); }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            padding: 2rem;
+            box-sizing: border-box;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .category {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1rem;
+            font-family: 'Courier New', Courier, monospace; /* Fuente monoespaciada para código */
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            margin-bottom: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        button {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+            color: white;
+        }
+
+        button:hover { opacity: 0.9; }
+        
+        #btn-check { background-color: var(--primary); }
+        #btn-reveal { background-color: var(--text-muted); }
+        #btn-next { background-color: var(--text-main); display: none; }
+
+        .feedback {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            min-height: 3rem;
+        }
+
+        .correct { color: var(--success); }
+        .incorrect { color: var(--danger); }
+        
+        .answer-reveal {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            font-family: 'Courier New', Courier, monospace;
+            display: none;
+            word-break: break-all;
+        }
+
+        .progress {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Entrenamiento de Comandos</h1>
+    
+    <div class="card">
+        <div class="category" id="category">Cargando...</div>
+        <div class="question" id="question">Preparando preguntas...</div>
+        
+        <input type="text" id="answer-input" placeholder="Escribe el comando exacto aquí..." autocomplete="off">
+        
+        <div class="buttons">
+            <button id="btn-check" onclick="checkAnswer()">Comprobar</button>
+            <button id="btn-reveal" onclick="showAnswer()">Ver Respuesta</button>
+            <button id="btn-next" onclick="nextQuestion()">Siguiente ➔</button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+        <div class="answer-reveal" id="answer-reveal"></div>
+    </div>
+
+    <div class="progress" id="progress"></div>
+
+<script>
+    // Base de datos de comandos
+    const flashcards = [
+        // Bloque 1: MikroTik
+        { category: "MikroTik - Básicos", question: "Comando para resetear de fábrica el router sin la configuración por defecto y sin mantener los usuarios.", answer: "system reset-configuration no-defaults=yes keep-users=no" },
+        { category: "MikroTik - Básicos", question: "Comando para cambiar el nombre de identidad del router a 'R1'.", answer: "system identity set name=R1" },
+        { category: "MikroTik - Interfaces", question: "Comando para asignar la IP 192.168.1.1/24 a la interfaz física ether1.", answer: "ip address add address=192.168.1.1/24 interface=ether1" },
+        { category: "MikroTik - Enrutamiento", question: "Comando para añadir una ruta estática hacia la red 10.0.0.0/24 a través de la puerta de enlace 192.168.1.254.", answer: "ip route add dst-address=10.0.0.0/24 gateway=192.168.1.254" },
+        { category: "MikroTik - Enrutamiento", question: "Comando para añadir una ruta por defecto a través de la puerta de enlace 192.168.1.254.", answer: "ip route add gateway=192.168.1.254" },
+        { category: "MikroTik - VLANs", question: "Comando para crear la interfaz virtual para la VLAN 10, colgando de ether1, con el nombre 'ether1.10'.", answer: "interface vlan add interface=ether1 name=ether1.10 vlan-id=10" },
+        
+        // Bloque 2: Switch TP-Link
+        { category: "TP-Link - Modos", question: "Comando para entrar al modo de configuración desde el modo privilegiado (S1#).", answer: "configure" },
+        { category: "TP-Link - Básicos", question: "Comando para cambiar el nombre del switch a 'SW1'.", answer: "hostname SW1" },
+        { category: "TP-Link - Básicos", question: "Comando para guardar la configuración actual y hacerla persistente en el inicio.", answer: "copy running-config startup-config" },
+        { category: "TP-Link - VLANs", question: "Comando para crear la VLAN 10 en la base de datos.", answer: "vlan 10" },
+        { category: "TP-Link - VLANs", question: "Comando (estando dentro de la vlan) para ponerle el nombre 'Alumnos'.", answer: "name Alumnos" },
+        { category: "TP-Link - Puertos", question: "Comando para entrar a configurar simultáneamente el rango de puertos gigabit del 1 al 5.", answer: "interface range gi 1/0/1-5" },
+        { category: "TP-Link - Puertos", question: "Comando para configurar un puerto en modo de acceso (equipos finales).", answer: "switchport mode access" },
+        { category: "TP-Link - Puertos", question: "Comando para asignar un puerto de acceso a la VLAN 10.", answer: "switchport access vlan 10" },
+        { category: "TP-Link - Puertos", question: "Comando para configurar un puerto en modo troncal.", answer: "switchport mode trunk" },
+        { category: "TP-Link - Puertos", question: "Comando para permitir explícitamente el paso de las VLANs 10 y 20 por un puerto troncal.", answer: "switchport trunk allowed vlan 10,20" },
+        { category: "TP-Link - Puertos", question: "Comando para configurar la VLAN 99 como nativa (PVID) en un puerto troncal.", answer: "switchport pvid 99" },
+        { category: "TP-Link - Gestión", question: "Comando global para aislar la administración del switch únicamente a la VLAN 99.", answer: "ip management-vlan 99" },
+
+        // Bloque 3: STP TP-Link
+        { category: "TP-Link - STP", question: "Comando global para activar el protocolo spanning-tree.", answer: "spanning-tree" },
+        { category: "TP-Link - STP", question: "Comando para establecer el modo de spanning-tree a su versión rápida (RSTP).", answer: "spanning-tree mode rstp" },
+        { category: "TP-Link - STP", question: "Comando para forzar a un switch a ser el Root Bridge dándole la prioridad máxima (0).", answer: "spanning-tree priority 0" },
+        { category: "TP-Link - MSTP", question: "Comando para entrar al menú de configuración específico de MSTP.", answer: "spanning-tree mst configuration" },
+        { category: "TP-Link - MSTP", question: "Comando dentro de MSTP para nombrar la región como '1'.", answer: "name 1" },
+        { category: "TP-Link - MSTP", question: "Comando dentro de MSTP para asociar las VLANs 10 y 20 a la instancia 2.", answer: "instance 2 vlan 10,20" },
+
+        // Bloque 4: OSPF y VRRP
+        { category: "MikroTik - OSPF", question: "Comando para crear una interfaz virtual tipo puente llamada 'lo0' (Loopback).", answer: "interface bridge add name=lo0" },
+        { category: "MikroTik - OSPF", question: "Comando para arrancar el motor de OSPF creando la instancia llamada 'default'.", answer: "routing ospf instance add name=default" },
+        { category: "MikroTik - OSPF", question: "Comando para crear el área 1 de OSPF con el identificador 0.0.0.1.", answer: "routing ospf area add name=area1 area-id=0.0.0.1" },
+        { category: "MikroTik - OSPF", question: "Comando para activar OSPF anunciando la red 10.0.0.0/24 y asignándola al área cero.", answer: "routing ospf network add network=10.0.0.0/24 area=backbone" },
+        { category: "MikroTik - OSPF", question: "Comando en un ABR para resumir (sumarizar) la red 10.1.0.0/16 proveniente del area1.", answer: "routing ospf area range add area=area1 range=10.1.0.0/16" },
+        { category: "MikroTik - VRRP", question: "Comando para crear la interfaz virtual de redundancia VRRP en ether1 con el grupo (vrid) 51.", answer: "interface vrrp add interface=ether1 vrid=51" },
+        { category: "MikroTik - VRRP", question: "Comando para subir la prioridad VRRP a 150 en la interfaz 'vrrp1' para forzar que sea el maestro.", answer: "interface vrrp set vrrp1 priority=150" },
+
+        // Bloque 5: BGP (FRR)
+        { category: "FRR Linux - BGP", question: "Comando para iniciar el proceso de enrutamiento exterior BGP asignando tu propio AS 100.", answer: "router bgp 100" },
+        { category: "FRR Linux - BGP", question: "Comando BGP para establecer la sesión (peering) con la IP vecina 20.0.0.1 que pertenece al AS 200.", answer: "neighbor 20.0.0.1 remote-as 200" },
+        { category: "FRR Linux - BGP", question: "Comando BGP para forzar que mi router se anuncie a sí mismo como el próximo salto hacia el vecino 10.0.0.2.", answer: "neighbor 10.0.0.2 next-hop-self" },
+        { category: "FRR Linux - BGP", question: "Comando BGP para inyectar y anunciar mi red local 12.0.0.0/24 al resto de Sistemas Autónomos.", answer: "network 12.0.0.0/24" },
+        { category: "FRR Linux - BGP", question: "Comando BGP para sumarizar la red 20.0.1.0/24 hacia el exterior anunciando únicamente el resumen.", answer: "aggregate-address 20.0.1.0/24 summary-only" },
+        { category: "FRR Linux - BGP", question: "Comando en la terminal general de Linux (fuera del modo config) para forzar la sincronización suave de políticas BGP.", answer: "clear ip bgp * soft" },
+
+        // Bloque 6: Firewalls
+        { category: "MikroTik - Firewall", question: "Comando para entrar al submenú donde se gestionan las reglas de filtrado del cortafuegos.", answer: "/ip firewall filter" },
+        { category: "MikroTik - Firewall", question: "Regla para aceptar tráfico dirigido AL propio router (input) mediante TCP por el puerto 22.", answer: "add chain=input protocol=tcp dst-port=22 action=accept" },
+        { category: "MikroTik - Firewall", question: "Regla para denegar todo el tráfico que intente ATRAVESAR el router (forward) y que provenga de la IP origen 10.0.0.0/24.", answer: "add chain=forward src-address=10.0.0.0/24 action=drop" },
+        { category: "MikroTik - Firewall", question: "Regla vital en forward para permitir el tráfico de retorno de conexiones ya iniciadas o relacionadas.", answer: "add chain=forward connection-state=established,related action=accept" },
+        { category: "MikroTik - DHCP Relay", question: "Comando para activar un agente DHCP llamado 'relay1' que escuche en ether1 y reenvíe al 10.2.0.10, usando la IP local 172.16.0.1.", answer: "ip dhcp-relay add name=relay1 dhcp-server=10.2.0.10 interface=ether1 local-address=172.16.0.1 disabled=no" },
+
+        // Bloque 7: Linux Terminal
+        { category: "Linux - Servicios", question: "Comando de sistema para reiniciar el demonio del servidor DHCP tras modificar su fichero de configuración.", answer: "systemctl restart isc-dhcp-server" },
+        { category: "Linux - Red", question: "Comando para que un cliente Linux libere y solicite de nuevo su concesión de IP por DHCP (modo verbose).", answer: "dhclient -r -v" },
+        { category: "Linux - Red", question: "Comando para limpiar y vaciar la memoria caché de resolución DNS local.", answer: "resolvectl flush-caches" }
+    ];
+
+    // Barajar las preguntas para que no salgan siempre en el mismo orden
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    shuffleArray(flashcards);
+
+    let currentIndex = 0;
+    const inputField = document.getElementById('answer-input');
+    const feedbackDiv = document.getElementById('feedback');
+    const revealDiv = document.getElementById('answer-reveal');
+    const btnCheck = document.getElementById('btn-check');
+    const btnReveal = document.getElementById('btn-reveal');
+    const btnNext = document.getElementById('btn-next');
+
+    function loadCard() {
+        const card = flashcards[currentIndex];
+        document.getElementById('category').textContent = card.category;
+        document.getElementById('question').textContent = card.question;
+        document.getElementById('progress').textContent = `Pregunta ${currentIndex + 1} de ${flashcards.length}`;
+        
+        // Reset UI
+        inputField.value = '';
+        inputField.disabled = false;
+        feedbackDiv.textContent = '';
+        feedbackDiv.className = 'feedback';
+        revealDiv.style.display = 'none';
+        
+        btnCheck.style.display = 'inline-block';
+        btnReveal.style.display = 'inline-block';
+        btnNext.style.display = 'none';
+        
+        inputField.focus();
+    }
+
+    function checkAnswer() {
+        const userAnswer = inputField.value.trim();
+        const correctAnswer = flashcards[currentIndex].answer;
+
+        if (userAnswer === correctAnswer) {
+            feedbackDiv.textContent = "¡Correcto! 🚀";
+            feedbackDiv.className = 'feedback correct';
+            inputField.disabled = true;
+            showNextButton();
+        } else {
+            feedbackDiv.textContent = "Incorrecto. Revisa la sintaxis o los espacios.";
+            feedbackDiv.className = 'feedback incorrect';
+            // Agitamos el input para dar feedback visual
+            inputField.style.transform = "translateX(10px)";
+            setTimeout(() => inputField.style.transform = "translateX(-10px)", 50);
+            setTimeout(() => inputField.style.transform = "translateX(0)", 100);
+        }
+    }
+
+    function showAnswer() {
+        revealDiv.textContent = `Comando esperado:\n${flashcards[currentIndex].answer}`;
+        revealDiv.style.display = 'block';
+        showNextButton();
+    }
+
+    function showNextButton() {
+        btnCheck.style.display = 'none';
+        btnReveal.style.display = 'none';
+        btnNext.style.display = 'inline-block';
+        btnNext.focus();
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex >= flashcards.length) {
+            // Reiniciar si se acaba
+            shuffleArray(flashcards);
+            currentIndex = 0;
+            alert("¡Has completado todas las tarjetas! Volvemos a empezar barajadas.");
+        }
+        loadCard();
+    }
+
+    // Permitir usar la tecla Enter para comprobar
+    inputField.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            checkAnswer();
+        }
+    });
+
+    // Iniciar la app
+    loadCard();
+</script>
+
+</body>
+</html>
