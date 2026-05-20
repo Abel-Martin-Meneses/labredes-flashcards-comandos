@@ -195,6 +195,12 @@
         { category: "MikroTik - Firewall", question: "Regla para denegar todo el tráfico que intente ATRAVESAR el router (forward) y que provenga de la IP origen 10.0.0.0/24.", answer: "add chain=forward src-address=10.0.0.0/24 action=drop" },
         { category: "MikroTik - Firewall", question: "Regla vital en forward para permitir el tráfico de retorno de conexiones ya iniciadas o relacionadas.", answer: "add chain=forward connection-state=established,related action=accept" },
         { category: "MikroTik - DHCP Relay", question: "Comando para activar un agente DHCP llamado 'relay1' que escuche en ether1 y reenvíe al 10.2.0.10, usando la IP local 172.16.0.1.", answer: "ip dhcp-relay add name=relay1 dhcp-server=10.2.0.10 interface=ether1 local-address=172.16.0.1 disabled=no" },
+    
+        // Bloque 7: MikroTik - NAT (Traducción de Direcciones)
+        { category: "MikroTik - NAT", question: "Comando para entrar al submenú donde se gestionan las reglas de traducción de direcciones (NAT).", answer: "/ip firewall nat" },
+        { category: "MikroTik - NAT", question: "Regla global de NAT para enmascarar (masquerade) todo el tráfico privado que sale hacia Internet por la interfaz física eth1.", answer: "add chain=srcnat out-interface=eth1 action=masquerade" },
+        { category: "MikroTik - NAT", question: "Regla de NAT para enmascarar (masquerade) EXCLUSIVAMENTE el tráfico que proviene de la red local 10.0.1.0/24 y sale por eth1.", answer: "add chain=srcnat src-address=10.0.1.0/24 out-interface=eth1 action=masquerade" },
+        { category: "MikroTik - NAT", question: "Regla de Destination NAT (Redirección de puertos) para enviar el tráfico que llega al puerto TCP 80 del router hacia el servidor interno 192.168.0.2.", answer: "add chain=dstnat protocol=tcp dst-port=80 action=dst-nat to-addresses=192.168.0.2" }
     ];
 
     // Barajar las preguntas para que no salgan siempre en el mismo orden
