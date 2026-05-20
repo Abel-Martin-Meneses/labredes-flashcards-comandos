@@ -182,6 +182,9 @@
         { category: "MikroTik - VRRP", question: "Comando para crear la interfaz virtual de redundancia VRRP en ether1 con el grupo (vrid) 51.", answer: "interface vrrp add interface=ether1 vrid=51" },
         { category: "MikroTik - VRRP", question: "Comando para subir la prioridad VRRP a 150 en la interfaz 'vrrp1' para forzar que sea el maestro.", answer: "interface vrrp set vrrp1 priority=150" },
 
+        // Bloque 4.1: OSPF - Rutas por defecto
+        { category: "MikroTik - OSPF", question: "Comando para propagar (inyectar) una ruta por defecto hacia el interior de la red OSPF desde un router de frontera (ASBR).", answer: "routing ospf instance set default distribute-default=always-as-type-2" }
+        
         // Bloque 5: BGP (FRR)
         { category: "FRR Linux - BGP", question: "Comando para iniciar el proceso de enrutamiento exterior BGP asignando tu propio AS 100.", answer: "router bgp 100" },
         { category: "FRR Linux - BGP", question: "Comando BGP para establecer la sesión (peering) con la IP vecina 20.0.0.1 que pertenece al AS 200.", answer: "neighbor 20.0.0.1 remote-as 200" },
